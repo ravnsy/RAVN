@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAVN | رافن - معرض التصاميم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1a1a1a;
+            --accent-red: #e50914;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #808080;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 75px;
+        }
+
+        ::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-red);
+            border-radius: 3px;
+        }
+
+        .hero {
+            height: 55vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(229, 9, 20, 0.12) 0%, transparent 70%),
+                        var(--bg-primary);
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .hero-logo {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4.5rem;
+            letter-spacing: 12px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(229, 9, 20, 0.4);
+        }
+
+        .hero-subtitle {
+            font-size: 1.6rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .hero-tagline {
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: var(--accent-red);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .main-content {
+            padding: 30px 15px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before,
+        .section-title::after {
+            content: '';
+            width: 50px;
+            height: 3px;
+            background: var(--accent-red);
+            border-radius: 2px;
+        }
+
+        .designs-count {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            background: var(--bg-card);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card img.loaded {
+            opacity: 1;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent-red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .card:hover .card-overlay,
+        .card:active .card-overlay {
+            opacity: 1;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            background: rgba(0,0,0,0.5);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .card-btn.primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -45px;
+            right: 0;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 2.2rem;
+            cursor: pointer;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: var(--text-primary);
+            font-size: 2rem;
+            width: 50px;
+            height: 80px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .modal-nav.prev { left: -70px; }
+        .modal-nav.next { right: -70px; }
+
+        .modal-counter {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px 90px;
+            background: var(--bg-secondary);
+            margin-top: 40px;
+        }
+
+        .footer-logo {
+            height: 50px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-brand {
+            color: var(--accent-red);
+            font-weight: 700;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(229, 9, 20, 0.25);
+            padding: 10px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-size: 1.4rem;
+            color: white;
+            transition: transform 0.2s ease;
+        }
+
+        .social-link:active {
+            transform: scale(0.95);
+        }
+
+        .social-link.whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+        }
+
+        .social-link.instagram {
+            background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+        }
+
+        .social-link.tiktok {
+            background: linear-gradient(135deg, #000, #1a1a1a);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                height: 40vh;
+                min-height: 300px;
+            }
+
+            .hero-logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .hero-title {
+                font-size: 2.8rem;
+                letter-spacing: 6px;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 8px;
+            }
+
+            .section-title::before,
+            .section-title::after {
+                width: 25px;
+            }
+
+            .modal-nav {
+                width: 40px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .modal-nav.prev { left: 5px; }
+            .modal-nav.next { right: 5px; }
+
+            .social-link {
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Loading placeholder */
+        .card.loading {
+            background: linear-gradient(90deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+            background-size: 200% 100%;
+            animation: loading 1.2s ease infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <img src="https://pfst.cf2.poecdn.net/base/image/6dbea63df0ef06809e20d91d65b5fae8588c324912c7037a7048c86fe7d2c765?w=1440&h=1440" alt="RAVN" class="hero-logo">
+            <h1 class="hero-title">RAVN</h1>
+            <p class="hero-subtitle">رافن</p>
+            <p class="hero-tagline">Built to Last • لطباعة الملابس</p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="section-header">
+            <h2 class="section-title">معرض التصاميم</h2>
+            <span class="designs-count" id="designs-count"></span>
+        </div>
+        <div class="gallery" id="gallery"></div>
+    </main>
+
+    <footer class="footer">
+        <img src="https://pfst.cf2.poecdn.net/base/image/6dbea63df0ef06809e20d91d65b5fae8588c324912c7037a7048c86fe7d2c765?w=1440&h=1440" alt="RAVN" class="footer-logo">
+        <p class="footer-text">جميع الحقوق محفوظة © 2024 <span class="footer-brand">RAVN</span></p>
+    </footer>
+
+    <nav class="bottom-nav">
+        <a href="https://wa.me/905433777659" target="_blank" rel="noopener noreferrer" class="social-link whatsapp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://www.instagram.com/ravn.0.1?igsh=a3FvNWZvc3Q1dXVn" target="_blank" rel="noopener noreferrer" class="social-link instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.tiktok.com/@ravn.01?_r=1&_t=ZS-92a4Lhd3ig1" target="_blank" rel="noopener noreferrer" class="social-link tiktok">
+            <i class="fab fa-tiktok"></i>
+        </a>
+    </nav>
+
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <button class="modal-nav prev" onclick="navigateModal(-1)">❮</button>
+            <img src="" alt="Preview" id="modalImage">
+            <button class="modal-nav next" onclick="navigateModal(1)">❯</button>
+            <div class="modal-counter" id="modalCounter"></div>
+        </div>
+    </div>
+
+    <script>
+        const allImages = [
+            "https://pfst.cf2.poecdn.net/base/image/6fe9c608ae4168d63d753f115218eb0703433361208a36788897befc8ff07894?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/21b5236de9b118ac59446cecabfd9cd1e4f193df5a823d98915c9272d9b87d4f?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/eff8b69efdf4f29e0e7be771d768435e93d4476b24158d9f304b37234304db7b?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/2385924bf1a437a01eedfdc8b79fa6229ffe1ea733664ec19285e299fb8a73f8?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/504c2c6d03ba51b95eaccdfed054f59d62ba095fcc70d99781d46cf178df73bb?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/250c09b2d2c8aff38d539ab0d536e61bb9e1089c0616a9984bbf850082915c46?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/c409551af795a27bb35935f3ddd8ab5bebdbe7b9a334fa34f0b00f792eab5c05?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/7e82446c90609817f442fc0105959936c9c6a3d82bd7cc2996711759c2bbccaa?w=1445&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/5077b5cd5b75fa3659accbf0c7eb48ac9f06fae3fe84c99c9733bd1d779c5951?w=1460&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e2f8f6c60d65db50d1b89cabae34a0283af3f0578d3861abb6fbbfe7988d4209?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b470aed739291768bf3163c411f22d2173078122785194cc26bc4307ecab1e87?w=1460&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/c68e55537d1dc4ee7a10986a937e537155414d9b105e6c950374a103d59c89a3?w=1445&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/cf72a2bf8d4e061fbb4d6bb659a8be7750447f5ea1e558a2bae98cbf2a9569e2?w=1450&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b3e56277a6fe2de8db9a9e4f2589c396d04efa93bc1302703fb7b671f9acbe03?w=1445&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/918c8f6504e562595cba1616522c58add9012453bef910ef216eb2db729e68f6?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/877086118aae6bff2765075b6091b1e479cf57ae2209ada3b2354019861faf7d?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/1ce08270ecbb9fe65a0f13a836ef74a3e0223f4b2c96e441bad63b51b754c9fc?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/30c8a5ede02722a0dc98e7f8fa4c4839c73466c6d873ca9c99aaa6b346aa249a?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/9071cfd571215ef0b5c35e10dd6de6ddaf7e7770f663916ff03cff5b12fe344b?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e6c99662c8863cc368540d94ea85af4eea4fb624c920974068e032c2aba51343?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/6223833ae17be827d694859b4ed5f41c28281f9a723762d269a8035c08c2d444?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/360b8f1e936026a9025e0ec9521da6a1dfe4dbaf9c8e432bff83e23457f464f6?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/49396ddbe7b767b45990d794e6dac82215b9ac880f0ad1d9a6536c6c5bc5e2a5?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/4caa77451accccbcf152e443c1a78fdcaa24c2bd9b2a4a8888b03928a1890718?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/67aa907bf773753d3e08a8d00dcacdec632e8483df4086a22b0297eee39d8538?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b26c61f75719e50462d52d3521bfa4ce363abde5e63ddc340107f0b209246deb?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/de6e4b988c51af1d294d8ecfcc7122c85c0ec4f65cdc24e10098d71548baba9f?w=2048&h=1365",
+            "https://pfst.cf2.poecdn.net/base/image/3b0e9c6bc308ddcb5d16a050768cda489b42ff2de045409f7fdbc9b3d3b042c7?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/95e7506b45c70978c8002b5dc6d5dcc762b709194b7014f189a06eb66ad48b4a?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/786bf8b25b99f8343cdcc7f4a3a7b4ed25a3c48ab70ac5711ae1e471163ec126?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/0cb6541b8c85438734032827ca892b9ac239dc9b73ecab652caf88b74d89c24b?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/9b05ff888ac35c8b410c24477bc8ff9a525d559481534fe824c48c28b85dfd0d?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/d78b994ca6d007f00f61dc209d3dc104a6bca89d90340f110d21447646d55af9?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/6aea1105cb1840ef22c803a710d8513c3fd769d2603519de68be913a88eb1e35?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/cc607700130a78b9078339a15d116f09f2e672fc5b634d81bc57899f99d9a2e4?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/ee956147793b5b0c9fc70917fe2a5c799574ac7f18babfa821d82357b8cd6c5a?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e6a0a8f653850ed73c006af2cae51395d47dc9009af232caf590f88f5272422f?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/fb3a6dea4d9fcff655931e83911751d8afae331422e3d2c7f99f9214689ea826?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/fb77c54ba32d09e1a226f5f8f559b2f8e7f9cdfb0126f688a354905073cf286b?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/76b84a78919c4992c75e4f47a04f2832b3c8fbead615ee7cefe9af2a063d9236?w=1341&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/333f686f1062715c8271c97c447ba4c4a903393d47a57173edbf7db66426b338?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/457294e8619a0bbfca2333f5eaea8eabbbd5e7b8e3831da280486b11b1f4250f?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e6c4bf9d3adf1b7ca2b9b065d5bfb9c49179199643f296f359abe949a37350c4?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/13949fbea46a89b48d1ae5c84cd2ed6131afbb68b8351bc27275a34ff404f172?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/4ba12eff91bffd913dddcc6a9c90902e1ec96c8be5067edc617318330a83cf36?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/eb34c70971470c2063133444eec2d0079cd18cfce0ba4dd1426f3ba6f4f7f669?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/0274d5616b35845aef205a566aa83390757ce574290fe2b9edc8b74d8e92fa99?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/9458f7525db1d70ab154778dbe86e28b5502fd51fa24b0990032df50a7f98a44?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/df1529ef7eae133472ca66082f958724e840a8bee3afafac8aa4fa9ac6f095d4?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/3cf91f2b15765c373296e3366499ad632e29af652482337311aafbdbd9cc6913?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/d57ba2c0a63d3259555c886182529e19e5c58e763773c90efca376830250bee7?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/a1ffa2aa94225187e1697afc06eef0321592a5fc463cafb5808df8f5b561716f?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/35b893e6b4af6179530c260b15449ce5adb9215a18ea819a5a46fa0de5a3337f?w=1877&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/bc36c8238a380dba6471ac34f5cc913b131c9a22f863026a01fa4369dcd7430e?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/31faee3dd4cccf5bdb71be3516ff37573dff9faa02000241865d35c518dcfdcf?w=1920&h=1280",
+            "https://pfst.cf2.poecdn.net/base/image/ba0b6a27974fb2ee206cd0061816ccd04e45b938a7cec336d4fabcbb2bfe7e58?w=1599&h=1066",
+            "https://pfst.cf2.poecdn.net/base/image/44a9fab3b420b05121cb1b6e2a8ce91ddbff08186baccd809e373cb42ceb3762?w=2048&h=1286",
+            "https://pfst.cf2.poecdn.net/base/image/f2e13dcfe12b3e708eec7e050eb576e59cdfb393d04057397a26cd8300653005?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b633e78cf3d887c92b6b99a475b44352e8bbb253206bfb93958e0d295d5c68da?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/4eb4fd84310743cd397322341c003851c645c36c65081577968773bf5710a367?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e53a189b65019d2150b3b6d7651cd463b4eb6a2d47904f8826c0c6f71b0bf53e?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/7b0d54b1af9d5ae83781f6ca3f5e18b186caed6483de4b05406dfd31104a61a4?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/77b519c36f749d80dbfb32b453dd38ca80e0bcb234093be7fe9bb945e6108c7b?w=1440&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/a1f3681503ae61628f16b8f8e4311f51e794866ca4cba10f6687fe1af7feb542?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/2e98772eaca35d1fc71626410f98879e477041361e76b0fa588229d2ca501ec7?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/2172b30f8f59cfd1f7b5772d60f7d9cb9b6d6224a948de98020cbb6994752a3f?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/828a18afd1758bc73ca3790299e912f22b166048a6edd28b8fde2c2c85b2011b?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/bf97dab328274149c10096076087baa715c4c07abfbcc49f7b964a1c8a6d6470?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/e2f2f0902cd8934db3e791d69106e7ee5814b39d92eba591b296c2728fb6b977?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b067a72d468618735ac1cb878115caaf1506c5c37ebdcd6300f993c97f94ee27?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/8ac07f81d22ee48d34685d30cc2510c5ce4612b87da2286d3b5a8e5bbc696687?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/bd5d5e49d2b85b93cf1e07c7cb07d58248b24923d79658e6f593acc9814126d7?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/f999a3befc556aa5c35c407e9c09297b82a53df12b74301b4884743df1669c99?w=1638&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/505af70b6d05adc8f950768fa6509011036112ace6ce8328cd035d748e33e975?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/6bbb902433373f02102c39d105d49066ae6a5d002a6e6fdb606806eb98d08f09?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/b9630cf492c8091b3669928ceac84706ae229ed80b7a75bbe1a0e9dbc7a54480?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/5b48a30b68a5012912cbb6743ff3d471d638c3f9ad7b5cfdbf30a82f56cff0a5?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/73aca6fc20e792369e9e88794f845197f11e78ee6401e29a2fdb285e0706bbaa?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/dc112bcd5fbaf9ed25cf3fa923254ab82e47864955fc03e73d54ccb1e6f04030?w=1309&h=2048",
+            "https://pfst.cf2.poecdn.net/base/image/f83b234434a55316407e5b3f6165bc2449767722a1d8838f32d3cf1436fedb8d?w=1920&h=1280",
+            "https://pfst.cf2.poecdn.net/base/image/0e3d6e3dd1cf49b6584865ca167321b678373dc28ff1766840d1c7397a3dbc53?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/6f6f064f70503e0cf443c916d0a0a3823714dd58afb0bf1d92858a44813a87c4?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/2470e2f0c297679093ca7964b9721bcb57073f21b5a4ab9db3e3eacdaa1bc39b?w=1920&h=1280",
+            "https://pfst.cf2.poecdn.net/base/image/add5f389720e4dc91d874b36a3b0e06f9bc429bdde9d65b05900a0879c2235f0?w=1280&h=1599",
+            "https://pfst.cf2.poecdn.net/base/image/d4f82a39bb0418bdc520304e5feb3272e0868d43c152c2a14ffa92e524c589d0?w=1920&h=1280"
+        ];
+
+        let currentIndex = 0;
+        const gallery = document.getElementById('gallery');
+        const countElement = document.getElementById('designs-count');
+
+        // Simple intersection observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '100px', threshold: 0 });
+
+        // Initialize gallery
+        function init() {
+            countElement.textContent = `${allImages.length} تصميم`;
+
+            allImages.forEach((url, i) => {
+                const card = document.createElement('div');
+                card.className = 'card loading';
+                card.innerHTML = `
+                    <span class="card-number">${i + 1}</span>
+                    <img data-src="${url}" alt="Design ${i + 1}">
+                    <div class="card-overlay">
+                        <div class="card-actions">
+                            <button class="card-btn primary">▶</button>
+                            <button class="card-btn">♡</button>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => openModal(i);
+                gallery.appendChild(card);
+                observer.observe(card);
+            });
+
+            // Lazy load images
+            const imgObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const card = img.closest('.card');
+                        img.src = img.dataset.src;
+                        img.onload = () => {
+                            card.classList.remove('loading');
+                            img.classList.add('loaded');
+                        };
+                        img.onerror = () => card.style.display = 'none';
+                        imgObserver.unobserve(img);
+                    }
+                });
+            }, { rootMargin: '200px' });
+
+            document.querySelectorAll('.card img').forEach(img => imgObserver.observe(img));
+        }
+
+        function openModal(index) {
+            currentIndex = index;
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = allImages[currentIndex];
+            document.getElementById('modalCounter').textContent = `${currentIndex + 1} / ${allImages.length}`;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function navigateModal(dir) {
+            currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
+            document.getElementById('modalImage').src = allImages[currentIndex];
+            document.getElementById('modalCounter').textContent = `${currentIndex + 1} / ${allImages.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('imageModal').classList.contains('active')) {
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowLeft') navigateModal(1);
+                if (e.key === 'ArrowRight') navigateModal(-1);
+            }
+        });
+
+        document.getElementById('imageModal').onclick = (e) => {
+            if (e.target.id === 'imageModal') closeModal();
+        };
+
+        init();
+    </script>
+</body>
+</html>
